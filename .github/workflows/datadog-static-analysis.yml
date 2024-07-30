@@ -1,0 +1,30 @@
+on: [push]
+
+name: Datadog Static Analysis
+
+jobs:
+  static-analysis:
+    runs-on: ubuntu-latest
+    name: Datadog Static Analyzer
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: Check code meets quality and security standards
+      id: datadog-static-analysis
+      uses: DataDog/datadog-static-analyzer-github-action@v1
+      with:
+        dd_api_key: ${{ secrets.DD_API_KEY }}
+        dd_app_key: ${{ secrets.DD_APP_KEY }}
+        dd_service: python-goof
+        dd_env: ci
+        dd_site: datadoghq.com
+        cpu_count: 2
+        
+  datadog-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install node
+        uses: actions/setup-node@v3
+      - run: yarn global add @datadog/datadog-ci
+      - run: datadog-ci gate evaluate
